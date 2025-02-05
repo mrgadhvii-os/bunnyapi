@@ -3,289 +3,494 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MrGadhvii Video Downloader</title>
+    <title>BunnyCDN Video Downloader</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <!-- Add animate.css for smooth animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Add this to your head section for the font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        .progress-ring {
-            transform: rotate(-90deg);
+        /* Custom animations and styles */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
         }
-        .progress-ring-circle {
-            transition: stroke-dashoffset 0.35s;
-            transform-origin: 50% 50%;
+        
+        .slide-up {
+            animation: slideUp 0.5s ease-out;
         }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
+            0% { transform: scale(1); }
             50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
-        .pulse-animation {
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .animate-pulse {
             animation: pulse 2s infinite;
+        }
+
+        /* Glass morphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        /* Responsive padding */
+        @media (max-width: 640px) {
+            .mobile-padding {
+                padding: 1rem;
+            }
+        }
+
+        /* Progress bar animation */
+        .progress-animate {
+            transition: width 0.3s ease-in-out;
+        }
+
+        /* Gradient background */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .instructions {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+        }
+
+        .timer-circle {
+            backdrop-filter: blur(4px);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-3xl mx-auto">
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 mb-6">MrGadhvii's DRM Video Downloader</h1>
-                
-                <!-- Filename Input -->
-<div class="mb-6">
-    <label for="filename" class="block text-sm font-medium text-gray-700 mb-2">Custom Filename</label>
-    <input type="text" id="filename" 
-           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-           placeholder="Enter custom filename ">
-</div>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full mx-auto animate__animated animate__fadeIn">
+        <div class="glass rounded-xl shadow-2xl overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
+                <h1 class="text-3xl font-bold text-center mb-2 animate__animated animate__slideInDown">
+                    FirePhysics Video Downloader
+                </h1>
+                <p class="text-center text-blue-100 text-sm">Powered by @MrGadhvii</p>
+            </div>
 
-                <!-- URL Input -->
-                <div class="mb-6">
-                    <label for="url" class="block text-sm font-medium text-gray-700 mb-2">Video URL</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="url" 
-                               class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                               placeholder="Enter video URL">
-                        <button id="checkUrl" 
-                                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                            Check URL
-                        </button>
+            <!-- Main content -->
+            <div class="p-6 space-y-6 mobile-padding">
+                <!-- Instructions -->
+                <div class="instructions bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg slide-up mb-4 relative">
+                    <div class="timer-circle absolute top-2 right-2 w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500 font-bold">
+                        10
                     </div>
-                </div>
-
-                <!-- Resolution Selection -->
-                <div id="resolutionContainer" class="mb-6 hidden">
-                    <label for="resolution" class="block text-sm font-medium text-gray-700 mb-2">Select Resolution</label>
-                    <select id="resolution" 
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    </select>
-                </div>
-
-                <!-- Download Button -->
-                <div id="downloadContainer" class="text-center hidden">
-                    <button id="startDownload" 
-                            class="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                        Start Download
-                    </button>
-                </div>
-
-                <!-- Progress Section -->
-                <div id="progressContainer" class="mt-8 hidden">
-                    <div class="flex items-center justify-center mb-4">
-                        <svg class="progress-ring" width="120" height="120">
-                            <circle class="text-gray-200" stroke="currentColor" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
-                            <circle class="progress-ring-circle text-indigo-600" stroke="currentColor" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
-                        </svg>
-                        <div class="ml-4">
-                            <div id="progressText" class="text-2xl font-bold text-gray-800">0%</div>
-                            <div id="speedText" class="text-sm text-gray-600">0 MB/s</div>
-                            <div id="sizeText" class="text-sm text-gray-600">0 MB / 0 MB</div>
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-green-800">Instructions:</h3>
+                            <div class="mt-2 text-sm text-green-700">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li>Paste your BunnyCDN video URL</li>
+                                    <li>Select your preferred quality</li>
+                                    <li>Optional: Enter custom filename</li>
+                                    <li>Click Download to start</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Add this after the progress container -->
-<div id="fragmentProgress" class="mt-4 hidden">
-    <div class="text-sm text-gray-600 mb-2">
-        Downloading fragments: <span id="fragmentCount">0/0</span>
-    </div>
-    <div class="w-full bg-gray-200 rounded-full h-2">
-        <div id="fragmentBar" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
-    </div>
-</div>
+                <!-- Important Notes -->
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg slide-up mb-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-yellow-800">Important Notes:</h3>
+                            <div class="mt-2 text-sm text-yellow-700">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li>If progress bar seems stuck, don't worry! Your download is still processing.</li>
+                                    <li>Larger files (>100MB) may take longer to process.</li>
+                                    <li>We guarantee 100% delivery of your file - please be patient.</li>
+                                    <li>For best results, keep this tab open until download completes.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-<div id="conversionProgress" class="mt-4 hidden">
-    <div class="flex items-center justify-center">
-        <svg class="animate-spin h-5 w-5 mr-3 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span class="text-sm text-gray-600">Converting video to MP4 format...</span>
-    </div>
-</div>
+                <!-- Form -->
+                <form id="downloadForm" class="space-y-4 fade-in">
+                    <!-- URL Input -->
+                    <div class="group">
+                        <label for="url" class="block text-sm font-medium text-gray-700 mb-1">Video URL</label>
+                        <input type="url" id="url" name="url" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                               placeholder="https://iframe.mediadelivery.net/...">
+                    </div>
 
-                
-                <!-- Status Messages -->
-                <div id="status" class="mt-4 p-4 rounded-md hidden"></div>
+                    <!-- Quality Select -->
+                    <div class="group">
+                        <label for="quality" class="block text-sm font-medium text-gray-700 mb-1">Quality</label>
+                        <select id="quality" name="quality" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                            <option value="">Loading qualities...</option>
+                        </select>
+                    </div>
+
+                    <!-- Filename Input -->
+                    <div class="group">
+                        <label for="filename" class="block text-sm font-medium text-gray-700 mb-1">Filename</label>
+                        <div class="flex rounded-lg overflow-hidden shadow-sm">
+                            <input type="text" id="filename" name="filename"
+                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                   placeholder="Custom filename (optional)">
+                            <span class="inline-flex items-center px-3 py-2 bg-gray-50 text-gray-500 border border-l-0 border-gray-300 rounded-r-lg">
+                                From @MrGadhvii
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Progress Section -->
+                    <div id="progressSection" class="hidden space-y-2">
+                        <div class="bg-gray-100 rounded-full overflow-hidden">
+                            <div id="progressBar" class="h-2 bg-blue-500 progress-animate" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span id="progressPercentage">0%</span>
+                            <span id="progressStats"></span>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span id="downloadSpeed"></span>
+                            <span id="downloadETA"></span>
+                        </div>
+                        <p id="statusMessage" class="text-center text-sm text-gray-700"></p>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 transform hover:scale-105">
+                        Download Video
+                    </button>
+                </form>
+
+                <!-- Quick Tips -->
+                <div class="mt-6 text-sm text-gray-600 border-t pt-4">
+                    <p class="font-semibold mb-2">💡 Quick Tips:</p>
+                    <ul class="space-y-1 text-xs">
+                        <li>• Direct link format: <code class="bg-gray-100 px-1 rounded">?url=VIDEO_URL&FileName=FILENAME</code></li>
+                        <li>• Higher quality = larger file size</li>
+                        <li>• Files auto-cleanup after download</li>
+                    </ul>
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center text-sm text-gray-500 mt-6">
+                    <p>Need help? Contact 
+                        <a href="https://t.me/MrGadhvii" class="text-blue-600 hover:text-blue-800 transition-colors duration-200" target="_blank">
+                            @MrGadhvii on Telegram
+                        </a>
+                    </p>
+                </div>
+
+                <!-- Add this before the closing div of the main content section -->
+                <div class="text-center text-sm text-gray-500 mt-6 border-t pt-4">
+                    <p>Server Status: <span id="pingCount" class="font-semibold">Loading...</span></p>
+                    <p class="text-xs">Last Ping: <span id="lastPing" class="italic">Checking...</span></p>
+                </div>
             </div>
         </div>
     </div>
 
-<script>        document.addEventListener('DOMContentLoaded', () => {
-    const socket = io();
-    let videoInfo = null;
-    let currentDownloadId = null;
-    
-    // Elements
-    const urlInput = document.getElementById('url');
-    const checkUrlButton = document.getElementById('checkUrl');
-    const resolutionContainer = document.getElementById('resolutionContainer');
-    const resolutionSelect = document.getElementById('resolution');
-    const downloadContainer = document.getElementById('downloadContainer');
-    const startDownloadButton = document.getElementById('startDownload');
-    const progressContainer = document.getElementById('progressContainer');
-    const progressRing = document.querySelector('.progress-ring-circle');
-    const progressText = document.getElementById('progressText');
-    const speedText = document.getElementById('speedText');
-    const sizeText = document.getElementById('sizeText');
-    const statusDiv = document.getElementById('status');
-    const fragmentProgress = document.getElementById('fragmentProgress');
-    const fragmentCount = document.getElementById('fragmentCount');
-    const fragmentBar = document.getElementById('fragmentBar');
-    const conversionProgress = document.getElementById('conversionProgress');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get form elements
+            const socket = io();
+            const form = document.getElementById('downloadForm');
+            const urlInput = document.getElementById('url');
+            const qualitySelect = document.getElementById('quality');
+            const fileNameInput = document.getElementById('filename');
+            const progressSection = document.getElementById('progressSection');
+            const progressBar = document.getElementById('progressBar');
+            const progressStats = document.getElementById('progressStats');
+            const progressPercentage = document.getElementById('progressPercentage');
 
-    // Set up progress ring
-    const radius = progressRing.r.baseVal.value;
-    const circumference = radius * 2 * Math.PI;
-    progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
-    progressRing.style.strokeDashoffset = circumference;
-
-    function setProgress(percent) {
-        const offset = circumference - (percent / 100 * circumference);
-        progressRing.style.strokeDashoffset = offset;
-    }
-
-    function showStatus(message, isError = false) {
-        statusDiv.textContent = message;
-        statusDiv.className = `mt-4 p-4 rounded-md ${isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
-        statusDiv.classList.remove('hidden');
-    }
-
-    function formatBytes(bytes, decimals = 2) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-    }
-
-    function formatSpeed(bytesPerSecond) {
-        return formatBytes(bytesPerSecond) + '/s';
-    }
-
-    // Check URL
-    checkUrlButton.addEventListener('click', async () => {
-        try {
-            const response = await fetch('/api/check_url', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ url: urlInput.value })
+            // Debug socket connection
+            socket.on('connect', () => {
+                console.log('Socket connected ✓');
             });
-            
-            const data = await response.json();
-            
-            if (response.ok) {
-                videoInfo = data.video_info;
-                
-                // Populate resolutions
-                resolutionSelect.innerHTML = data.resolutions
-                    .map(res => `<option value="${res}">${res}</option>`)
-                    .join('');
+
+            // Handle URL input
+            urlInput.addEventListener('input', debounce(function() {
+                const url = this.value.trim();
+                if (url) {
+                    console.log('Getting qualities for:', url);
+                    qualitySelect.innerHTML = '<option value="">Loading qualities...</option>';
+                    qualitySelect.disabled = true;
+                    socket.emit('get_qualities', { url: url });
+                } else {
+                    qualitySelect.innerHTML = '<option value="">Select Quality</option>';
+                    qualitySelect.disabled = true;
+                }
+            }, 500));
+
+            // Handle qualities response
+            socket.on('qualities', function(data) {
+                console.log('Received qualities:', data);
+                qualitySelect.innerHTML = '';
+
+                if (data.error) {
+                    console.error('Quality error:', data.error);
+                    qualitySelect.innerHTML = '<option value="">Error loading qualities</option>';
+                    qualitySelect.disabled = true;
+                    return;
+                }
+
+                // Add default option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select Quality';
+                qualitySelect.appendChild(defaultOption);
+
+                // Add quality options
+                if (data.qualities && data.qualities.length > 0) {
+                    data.qualities.forEach(quality => {
+                        const option = document.createElement('option');
+                        option.value = quality.resolution;
+                        option.textContent = `${quality.name} (${quality.resolution})`;
+                        qualitySelect.appendChild(option);
+                    });
+                    qualitySelect.disabled = false;
+                    console.log('Qualities loaded successfully');
+                } else {
+                    qualitySelect.innerHTML = '<option value="">No qualities available</option>';
+                    qualitySelect.disabled = true;
+                    console.log('No qualities found');
+                }
+            });
+
+            // Handle download progress
+            socket.on('download_progress', function(data) {
+                if (!progressSection || !progressBar || !progressPercentage || !progressStats) {
+                    return;
+                }
+
+                progressSection.classList.remove('hidden');
+
+                if (data.status === 'starting') {
+                    progressBar.style.width = '0%';
+                    progressPercentage.textContent = '0%';
+                    progressStats.textContent = 'Initializing download...';
+                    progressBar.style.backgroundColor = '#3B82F6';  // Reset to blue
+                }
+                else if (data.status === 'preparing') {
+                    progressBar.style.width = '5%';
+                    progressPercentage.textContent = '5%';
+                    progressStats.textContent = 'Preparing download...';
+                }
+                else if (data.status === 'downloading') {
+                    const percent = Math.min(Math.round(data.percentage), 100);
+                    progressBar.style.width = `${percent}%`;
+                    progressPercentage.textContent = `${percent}%`;
+                    progressStats.textContent = `${data.downloaded} / ${data.total_size} (${data.speed}/s)`;
                     
-                // Show resolution and download sections
-                resolutionContainer.classList.remove('hidden');
-                downloadContainer.classList.remove('hidden');
-                statusDiv.classList.add('hidden');
-            } else {
-                showStatus(data.error, true);
+                    if (percent === 100) {
+                        setTimeout(() => {
+                            progressBar.style.width = '0%';
+                            progressPercentage.textContent = '0%';
+                            progressStats.textContent = 'Starting conversion...';
+                            progressBar.style.backgroundColor = '#F59E0B';
+                            
+                            let conversionProgress = 0;
+                            const conversionInterval = setInterval(() => {
+                                conversionProgress += 5;
+                                if (conversionProgress <= 100) {
+                                    progressBar.style.width = `${conversionProgress}%`;
+                                    progressPercentage.textContent = `${conversionProgress}%`;
+                                    progressStats.textContent = 'Converting to MP4...';
+                                } else {
+                                    clearInterval(conversionInterval);
+                                }
+                            }, 100);
+                        }, 500);
+                    }
+                }
+                else if (data.status === 'converting') {
+                    progressBar.style.backgroundColor = '#F59E0B';
+                    progressBar.style.width = '95%';
+                    progressPercentage.textContent = '95%';
+                    progressStats.textContent = 'Converting to MP4...';
+                }
+                else if (data.status === 'complete') {
+                    progressBar.style.backgroundColor = '#10B981';
+                    progressBar.style.width = '100%';
+                    progressPercentage.textContent = '100%';
+                    progressStats.textContent = 'Download completed!';
+                    
+                    setTimeout(() => {
+                        progressSection.classList.add('hidden');
+                        progressBar.style.backgroundColor = '#3B82F6';
+                    }, 3000);
+                }
+                else if (data.status === 'error') {
+                    progressStats.textContent = `Error: ${data.message}`;
+                    progressBar.style.backgroundColor = '#f56565';
+                }
+            });
+
+            // Handle URL parameters
+            const params = new URLSearchParams(window.location.search);
+            const urlParam = params.get('url');
+            if (urlParam) {
+                const decodedUrl = decodeURIComponent(urlParam);
+                urlInput.value = decodedUrl;
+                console.log('Auto-fetching qualities for URL:', decodedUrl);
+                socket.emit('get_qualities', { url: decodedUrl });
+
+                const fileNameParam = params.get('FileName');
+                if (fileNameParam) {
+                    fileNameInput.value = decodeURIComponent(fileNameParam);
+                }
             }
-        } catch (error) {
-            showStatus('Failed to check URL: ' + error.message, true);
-        }
-    });
 
-    // Start Download
-  // Start Download
-startDownloadButton.addEventListener('click', async () => {
-const filename = document.getElementById('filename').value.trim();
+            // Form submission
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                try {
+                    progressSection.classList.remove('hidden');
+                    progressBar.style.width = '0%';
+                    progressPercentage.textContent = '0%';
+                    progressStats.textContent = 'Starting download...';
 
-if (!filename) {
-showStatus('Please enter a custom filename.', true);
-return;
-}
+                    const formData = new FormData(this);
+                    const response = await fetch('/download', {
+                        method: 'POST',
+                        body: formData
+                    });
 
-try {
-const response = await fetch('/api/start_download', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-        video_info: videoInfo,
-        resolution: resolutionSelect.value,
-        filename: filename // Send the custom filename
-    })
-});
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Download failed');
+                    }
 
-const data = await response.json();
+                    const blob = await response.blob();
+                    const filename = response.headers.get('content-disposition')?.split('filename=')[1]?.replace(/"/g, '') 
+                                   || 'video_From_MrGadhvii.mp4';
 
-if (response.ok) {
-    currentDownloadId = data.download_id;
-    progressContainer.classList.remove('hidden');
-    startDownloadButton.disabled = true;
-    startDownloadButton.classList.add('opacity-50');
-    showStatus('Download started... Please wait...');
-} else {
-    showStatus(data.error, true);
-}
-} catch (error) {
-showStatus('Failed to start download: ' + error.message, true);
-}
-});
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
 
+                    progressBar.style.width = '100%';
+                    progressPercentage.textContent = '100%';
+                    progressStats.textContent = 'Download completed!';
 
-    // Socket events
-    socket.on('download_progress', (data) => {
-        if (data.id === currentDownloadId) {
-            setProgress(data.progress);
-            progressText.textContent = `${Math.round(data.progress)}%`;
-            speedText.textContent = formatSpeed(data.speed);
-            sizeText.textContent = `${formatBytes(data.downloaded)} / ${formatBytes(data.size)}`;
-        }
-    });
-    socket.on('fragment_progress', (data) => {
-        if (data.id === currentDownloadId) {
-            fragmentProgress.classList.remove('hidden');
-            fragmentCount.textContent = `${data.downloaded}/${data.total}`;
-            const percent = (data.downloaded / data.total) * 100;
-            fragmentBar.style.width = `${percent}%`;
-        }
-    });
+                    setTimeout(() => {
+                        progressSection.classList.add('hidden');
+                    }, 3000);
 
-    socket.on('conversion_started', (data) => {
-        if (data.id === currentDownloadId) {
-            fragmentProgress.classList.add('hidden');
-            conversionProgress.classList.remove('hidden');
-            showStatus('Download complete! Converting video to MP4 format...');
-        }
-    });
+                } catch (error) {
+                    console.error('Download error:', error);
+                    progressStats.textContent = `Error: ${error.message}`;
+                    progressBar.style.backgroundColor = '#f56565';
+                }
+            });
 
-    socket.on('download_complete', (data) => {
-        if (data.id === currentDownloadId) {
-            setProgress(100);
-            progressText.textContent = '100%';
-            conversionProgress.classList.add('hidden');
-            showStatus('Conversion complete! Starting download...');
+            // Debounce function
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func.apply(this, args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Instructions timer
+            const instructionsDiv = document.querySelector('.instructions');
+            const timerCircle = document.querySelector('.timer-circle');
             
-            // Trigger the download
-            const downloadLink = document.createElement('a');
-            downloadLink.href = data.download_url;
-            downloadLink.style.display = 'none';
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-        }
-    });
+            if (instructionsDiv && timerCircle) {
+                console.log('Instructions visibility timer started');
+                let timeLeft = 10;
+                
+                const timerInterval = setInterval(() => {
+                    timeLeft--;
+                    timerCircle.textContent = timeLeft;
+                    console.log(`Timer: ${timeLeft} seconds remaining`);
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        console.log('Fading out instructions');
+                        instructionsDiv.style.transition = 'all 0.5s ease-out';
+                        instructionsDiv.style.transform = 'translateY(-20px)';
+                        instructionsDiv.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            console.log('Removing instructions from DOM');
+                            instructionsDiv.style.display = 'none';
+                        }, 500);
+                    }
+                }, 1000);
+            }
 
-    socket.on('download_error', (data) => {
-        if (data.id === currentDownloadId) {
-            showStatus(`Download failed: ${data.error}`, true);
-            startDownloadButton.disabled = false;
-            startDownloadButton.classList.remove('opacity-50');
-        }
-    });
-});
-</script>
+            // Add this inside your existing DOMContentLoaded event listener
+            function updatePingStats() {
+                fetch('/ping-stats')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('pingCount').textContent = `${data.total_pings} pings sent`;
+                        document.getElementById('lastPing').textContent = data.last_ping || 'Never';
+                    })
+                    .catch(error => console.error('Error fetching ping stats:', error));
+            }
+
+            // Update stats every 30 seconds
+            updatePingStats();
+            setInterval(updatePingStats, 30000);
+        });
+    </script>
 </body>
 </html>
