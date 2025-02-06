@@ -253,13 +253,37 @@
             });
 
             // Handle URL input
+            function cleanVideoUrl(url) {
+                try {
+                    // Check if URL contains '/secure'
+                    const secureIndex = url.indexOf('/secure');
+                    if (secureIndex !== -1) {
+                        // Return only the part before '/secure'
+                        return url.substring(0, secureIndex);
+                    }
+                    return url;
+                } catch (error) {
+                    console.error('URL cleaning error:', error);
+                    return url;
+                }
+            }
+
             urlInput.addEventListener('input', debounce(function() {
-                const url = this.value.trim();
+                let url = this.value.trim();
                 if (url) {
-                    console.log('Getting qualities for:', url);
+                    // Clean the URL in background without modifying input field
+                    const cleanedUrl = cleanVideoUrl(url);
+                    console.log('Original URL:', url);
+                    console.log('Cleaned URL:', cleanedUrl);
+                    
+                    // Keep original URL in input field
+                    // this.value = url;  // Original URL stays visible
+                    
+                    // Use cleaned URL for backend processing
+                    console.log('Getting qualities for:', cleanedUrl);
                     qualitySelect.innerHTML = '<option value="">Loading qualities...</option>';
                     qualitySelect.disabled = true;
-                    socket.emit('get_qualities', { url: url });
+                    socket.emit('get_qualities', { url: cleanedUrl });
                 } else {
                     qualitySelect.innerHTML = '<option value="">Select Quality</option>';
                     qualitySelect.disabled = true;
