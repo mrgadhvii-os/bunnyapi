@@ -1,22 +1,8 @@
+
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "app.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/socket.io/(.*)",
-      "dest": "app.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "app.py"
-    }
-  ],
-  "env": {
-    "PYTHON_VERSION": "3.9"
-  }
+  "API_CLASSPLUS": "https://class-ka-plus-25336c474d4b.herokuapp.com/get?url",
+  "PW_API": "https://anonymouspwplayer-0e5a3f512dec.herokuapp.com",
+  "APPXDL": "https://x-dl-bef0f7ca92c8.herokuapp.com",
+  "APPX_ZIP": "https://apx-zip-api-v1-d5fa292cc717.herokuapp.com",
+  "ZIP_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzY0MTQ2NDMzMyIsInRnX3VzZXJuYW1lIjoidWcgY29yZSJ9._-riKzorAPkUkSqpWyOvDE520jcc1c-LabVNNzDCNwE"
 }
